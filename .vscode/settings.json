@@ -1,0 +1,27 @@
+{
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.black-formatter",
+    },
+    "python.analysis.typeCheckingMode": "standard",
+    "python.analysis.ignore": [
+        "**/.git/**",
+        "**/.__pycache__/**",
+        "**/.venv/**",
+        "**/mypy_cache/**",
+    ],
+    "black-formatter.args": ["--line-length", "100"],
+    "flake8.args": [
+        "--max-line-length=100",
+        "--ignore=E402,F841,F401,E302,E305",
+    ],
+    "pylint.args": [
+        "--max-line-length=100",
+        "--disable=C0114,C0115,C0116,E0402,E0401"
+    ],
+    "mypy-type-checker.args": [
+        "--ignore-missing-imports"
+    ],
+    "editor.rulers": [
+        100
+    ],
+  }
