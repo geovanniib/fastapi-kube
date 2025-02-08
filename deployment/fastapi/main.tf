@@ -1,86 +1,39 @@
-provider "kubernetes" {
-  config_path = "../config/config-k3s"
-}
-
-terraform {
-  required_providers {
-    kubernetes = {
-        source = "hashicorp/kubernetes"
-        version = ">= 2.0"
-    }
-  }
-
-  backend "kubernetes" {
-    secret_suffix    = "state"
-    config_path      = "../config/config-k3s"
-  }
-}
-
-
-resource "kubernetes_namespace" "example" {
+resource "kubernetes_secret" "docker_registry" {
   metadata {
-    name = "my-first-namespace"
+    name = "docker-registry-secret"
   }
+
+  # data = {
+  #   ".dockerconfigjson" = base64encode(jsonencode({
+  #     auths = {
+  #       "ghcr.io"= {
+  #         # username = var.docker_username
+  #         # password = var.docker_password
+  #         # email    = var.docker_email
+  #       }
+  #     }
+  #   }))
+  # }
+
+  data = {
+    ".dockerconfigjson" = "${file("~/.docker/config.json")}"
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
 }
 
 
 
-# resource "kubernetes_deployment" "my_app" {
-#   metadata {
-#     name = "my-app"
-#     labels = {
-#       app = "my-app"
-#     }
-#   }
+# Define ConfigMap or Secret for Nginx configuration (optional)
+resource "kubernetes_config_map" "nginx_config" {
+  metadata {
+    name = "nginx-config"
+  }
 
-#   spec {
-#     replicas = 3  # You can change this later for scaling
-#     selector {
-#       match_labels = {
-#         app = "my-app"
-#       }
-#     }
-
-#     template {
-#       metadata {
-#         labels = {
-#           app = "my-app"
-#         }
-#       }
-
-#       spec {
-#         container {
-#           name  = "my-api-container"
-#           image = "your-custom-api-image:latest"
-#           port {
-#             container_port = 8080
-#           }
-#         }
-#       }
-#     }
-#   }
-# }
-
-# resource "kubernetes_service" "my_app" {
-#   metadata {
-#     name = "my-app-service"
-#   }
-
-#   spec {
-#     selector = {
-#       app = "my-app"
-#     }
-
-#     port {
-#       port        = 8080
-#       target_port = 8080
-#     }
-
-#     type = "LoadBalancer"
-#   }
-# }
-
-
+  data = {
+    "nginx.conf" = file("../../nginx.conf")
+  }
+}
 
 
 resource "kubernetes_deployment" "mem_db" {
@@ -278,6 +231,10 @@ resource "kubernetes_deployment" "api" {
             value = "6379"
           }
         }
+
+        image_pull_secrets {
+            name = kubernetes_secret.docker_registry.metadata[0].name
+        }
       }
     }
   }
@@ -285,7 +242,7 @@ resource "kubernetes_deployment" "api" {
 
 resource "kubernetes_service" "api_service" {
   metadata {
-    name = "api-service"
+    name = "api"
   }
 
   spec {
@@ -369,123 +326,103 @@ resource "kubernetes_deployment" "worker" {
             value = "dev"
           }
         }
+
+        image_pull_secrets {
+            name = kubernetes_secret.docker_registry.metadata[0].name
+        }
       }
     }
   }
 }
 
-# resource "kubernetes_service" "worker_service" {
-#   metadata {
-#     name = "worker-service"
-#   }
+resource "kubernetes_service" "worker_service" {
+  metadata {
+    name = "worker"
+  }
 
-#   spec {
-#     selector = {
-#       app = "worker"
-#     }
-#     ports {
-#       port        = 8000
-#       target_port = 8000
-#     }
-#   }
-# }
-
-# # NGINX Service for Load Balancer
-# resource "kubernetes_deployment" "nginx" {
-#   metadata {
-#     name = "nginx"
-#     labels = {
-#       app = "nginx"
-#     }
-#   }
-
-#   spec {
-#     replicas = 1
-#     selector {
-#       match_labels = {
-#         app = "nginx"
-#       }
-#     }
-
-#     template {
-#       metadata {
-#         labels = {
-#           app = "nginx"
-#         }
-#       }
-
-#       spec {
-#         container {
-#           name  = "nginx"
-#           image = "nginx:1-alpine"
-#           resources {
-#             limits = {
-#               memory = "256Mi"
-#               cpu    = "0.512"
-#             }
-#           }
-#           ports {
-#             container_port = 80
-#           }
-#           volume_mount {
-#             mount_path = "/etc/nginx/nginx.conf"
-#             sub_path   = "nginx.conf"
-#           }
-#         }
-#       }
-#     }
-#   }
-# }
-
-# resource "kubernetes_service" "nginx_service" {
-#   metadata {
-#     name = "nginx-service"
-#   }
-
-#   spec {
-#     selector = {
-#       app = "nginx"
-#     }
-#     ports {
-#       port        = 80
-#       target_port = 80
-#     }
-#   }
-# }
-
-# # Define ConfigMap or Secret for Nginx configuration (optional)
-# resource "kubernetes_config_map" "nginx_config" {
-#   metadata {
-#     name = "nginx-config"
-#   }
-
-#   data = {
-#     "nginx.conf" = file("./nginx.conf")
-#   }
-# }
-
-# Define Terraform variables for API and Worker settings
-variable "api_image_name" {
-  type    = string
-  default = "color_api"
+  spec {
+    selector = {
+      app = "worker"
+    }
+    port {
+      port        = 8000
+      target_port = 8000
+    }
+  }
 }
 
-variable "worker_image_name" {
-  type    = string
-  default = "color_worker"
+# NGINX Service for Load Balancer
+resource "kubernetes_deployment" "nginx" {
+  metadata {
+    name = "nginx"
+    labels = {
+      app = "nginx"
+    }
+  }
+
+  spec {
+    replicas = 1
+    selector {
+      match_labels = {
+        app = "nginx"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "nginx"
+        }
+      }
+
+      spec {
+        container {
+          name  = "nginx"
+          image = "nginx:1-alpine"
+          resources {
+            limits = {
+              memory = "256Mi"
+              cpu    = "0.512"
+            }
+          }
+          port {
+            container_port = 80
+          }
+          volume_mount {
+            name = "nginx-volume"
+            mount_path = "/etc/nginx/nginx.conf"
+            sub_path   = "nginx.conf"
+          }
+        }
+
+      volume {
+        name = "nginx-volume"
+        config_map {
+          name = "nginx-config"
+        }
+      }
+      }
+    }
+  }
 }
 
-variable "min_log_level" {
-  type    = string
-  default = "info"
+resource "kubernetes_service" "nginx_service" {
+  metadata {
+    name = "nginx-service"
+  }
+
+  spec {
+    selector = {
+      app = "nginx"
+    }
+    port {
+      port        = 8000
+      target_port = 80
+    }
+
+    type = "LoadBalancer"
+  }
 }
 
-variable "api_host" {
-  type    = string
-  default = "0.0.0.0"
-}
 
-variable "api_port" {
-  type    = string
-  default = "8000"
-}
+
