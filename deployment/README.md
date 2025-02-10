@@ -1,4 +1,4 @@
-# IaC manifest 
+# Deployment
 
 This folder contains the resources needed to deploy and load test the application in Kubernetes (k3s).
 
@@ -10,6 +10,12 @@ This folder contains the resources needed to deploy and load test the applicatio
 ## Description of directories
 
 In the opentofu directory there are templates for the application to be deployed in a k3s, while in k6 there is a js script that using k6 can be used to test the behavior of the application at a certain amount of load.
+
+### images
+
+Contains images used in redme.md
+
+
 
 ### opentofu
 
