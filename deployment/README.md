@@ -19,7 +19,7 @@ Contains images used in redme.md
 
 ### opentofu
 
-tree .
+$ tree
 
 In the "config" directory you need to store the KUBECONFIG of the local k3s for the correct operation of the implementation named "config-k3s" which is ignored in the gitignore.
 
