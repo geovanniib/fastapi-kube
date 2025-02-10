@@ -5,9 +5,41 @@
 The default application will be hosted at (`http://localhost:3000/`) . while the Grafana UI will be at (`http://localhost:8888/login`)
 
 
-
-
 ![screenshot](deployment/images/app.png)
+
+
+## How to perform the deployment?
+
+1. Configuring Permissions and Credentials
+
+Collaborators of this project must create a classic access token on Github with write permissions on packages, with which they can publish to "ghcr.io/geovanniib/color_worker" and "ghcr.io/geovanniib/color_api", finally execute the bash script `tf-conf` filling in the console with the requested values ​​to configure the project with the local docker and k3s credentials.
+
+
+![screenshot](deployment/images/docker.png)
+
+
+2. Create the necessary images and publish them 
+
+Using the `tf-setup` bash script the color_worker and color_api images will be published to github packages.
+
+![screenshot](deployment/images/packages.png)
+
+
+3. Deployment of the entire application 
+
+First, using the default values ​​you should leave port 3000 and 8888 free so that there are no problems with the load balancers used. Then, using the bash script "tf-run" and the docker and k3s credentials already configured in step 1, everything required will be executed. For more detailed information read the deployment/README.md.
+
+![screenshot](deployment/images/kubernetes.png)
+
+![screenshot](deployment/images/grafana.png)
+
+
+4. Perform load testing
+
+If k6 is installed, proceed to run the load testing with the help of the `tf-load` script to simulate how it behaves under load, in addition to its respective auto-scaling.
+
+![screenshot](deployment/images/k6.png)
+
 
 # Python FastAPI Template with Nginx, Redis, & Postgres
 
