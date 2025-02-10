@@ -19,7 +19,29 @@ Contains images used in redme.md
 
 ### opentofu
 
-$ tree
+```tree opentofu/
+opentofu/
+├── config
+│   ├── config-file-here.txt
+│   └── config-k3s
+├── fastapi
+│   ├── external.tf
+│   ├── keda.tf
+│   ├── main.tf
+│   ├── output.tf
+│   ├── provider.tf
+│   ├── storage.tf
+│   └── variables.tf
+├── monitoring
+│   ├── main.tf
+│   ├── notes.txt
+│   ├── output.tf
+│   ├── provider.tf
+│   └── variables.tf
+└── requirements
+    ├── main.tf
+    └── provider.tf
+```
 
 In the "config" directory you need to store the KUBECONFIG of the local k3s for the correct operation of the implementation named "config-k3s" which is ignored in the gitignore.
 
@@ -31,10 +53,13 @@ In the "requirements" directory you can find the installation of the KEDA CDRs o
 
 ### k6
 
-tree
-.
+
+
+```tree k6
+k6
 ├── endpoints.txt
 └── load-test.js
+```
 
 The load-test.js will perform a small load testing of the application testing the healthcheck APIs and testing the `${BASE_URL}/color/match?name=${name}` API with some correct values.
 
