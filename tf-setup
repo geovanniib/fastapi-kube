@@ -11,6 +11,7 @@
 API_IMAGE="${DOCKER_REGISTRY}/${API_IMAGE_NAME}:${API_IMAGE_TAG}"
 WORKER_IMAGE="${DOCKER_REGISTRY}/${WORKER_IMAGE_NAME}:${WORKER_IMAGE_TAG}"
 
+
 # Step 1: Build the Docker images
 echo "Building the API image..."
 docker build -f Dockerfile.api -t "${API_IMAGE}" .
@@ -32,16 +33,3 @@ else
     echo "Error pushing images to ${DOCKER_REGISTRY}. Exiting..."
     exit 1
 fi
-
-# Optional: Clean up local images if you want to save space
-# docker rmi "${API_IMAGE}" "${WORKER_IMAGE}"
-
-# Step 4: Deploy Docker Compose services
-# echo "Deploying services using Docker Compose..."
-# docker-compose -f docker-compose.yml up -d
-
-# # Step 5: Confirm the status of the services
-# echo "Checking the status of the services..."
-# docker-compose -f docker-compose.yml ps
-
-# echo "Deployment complete!"

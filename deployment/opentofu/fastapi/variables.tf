@@ -11,7 +11,7 @@ variable "worker_image_name" {
 
 variable "min_log_level" {
   type    = string
-  default = "info"
+  default = "DEBUG"
 }
 
 variable "api_host" {

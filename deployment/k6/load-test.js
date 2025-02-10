@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 
-const BASE_URL = 'http://localhost:3030';
+const BASE_URL = 'http://localhost:3000';
 const NAMES = ["white", "black", "gray", "red", "pink", "grape", "violet", "indigo", "blue", "cyan", "teal", "green", "lime", "yellow", "orange"];
 
 // See https://k6.io/docs/using-k6/k6-options/

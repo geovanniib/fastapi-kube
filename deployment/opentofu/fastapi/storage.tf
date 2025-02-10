@@ -4,7 +4,7 @@ resource "kubernetes_config_map" "sql_schema" {
   }
 
   data = {
-    "000_schema.sql" = file("../../db/000_schema.sql")
+    "000_schema.sql" = file("../../../db/000_schema.sql")
   }
 }
 

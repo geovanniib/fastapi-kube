@@ -9,8 +9,6 @@ provider "helm" {
   }
 }
 
-provider "template" {
-}
 
 terraform {
   required_providers {

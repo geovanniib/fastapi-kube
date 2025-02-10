@@ -1,9 +1,22 @@
 #!/bin/bash
 
 
-k6 run ./deployment/k6/load-test.js
+# Function to check if k6 is installed
+check_k6_installed() {
+    if ! command -v k6 &> /dev/null; then
+        echo "Error: k6 is not installed."
+        echo "Please install k6 to proceed."
+        exit 1
+    else
+        echo "k6 is installed."
+    fi
+}
 
+# Check if k6 is installed
+check_k6_installed
 
-# docker run --rm -v $(pwd)/deployment/k6:/scripts -w /scripts loadimpact/k6 run load-test.js
+# Run the load test
+echo "Running k6 load test..."
+k6 run ./deployment/k6/load-test.js || { echo "Error: k6 test failed."; exit 1; }
 
-
+echo "Load test completed successfully."

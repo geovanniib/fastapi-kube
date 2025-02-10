@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Set the path to the deployment directory
+DEPLOYMENT_PATH="$(pwd)/deployment/opentofu"
+
+# Echo the deployment path for debugging purposes
+echo "Deployment path: $DEPLOYMENT_PATH"
+
+# Function to destroy tofu configuration in a given directory
+tofu_destroy() {
+    local dir=$1
+    echo "Processing directory: $dir"
+    
+    if [ -d "$dir" ]; then
+        cd "$dir" || { echo "Failed to change directory to $dir"; exit 1; }
+        
+        echo "Running tofu destroy in $dir"
+        tofu destroy --auto-approve || { echo "tofu apply failed in $dir"; exit 1; }
+    else
+        echo "Directory $dir does not exist. Skipping."
+    fi
+}
+
+# Destroy tofu configuration in the required directories
+
+tofu_destroy "$DEPLOYMENT_PATH/fastapi"
+tofu_destroy "$DEPLOYMENT_PATH/monitoring"
+tofu_destroy "$DEPLOYMENT_PATH/requirements"
+
+
+
+echo "All running containers has been stopped"
