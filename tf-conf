@@ -1,0 +1,55 @@
+#!/bin/bash
+
+K3S_KUBECONFIG_DEFAULT_PATH="/etc/rancher/k3s/k3s.yaml"
+TARGET_KUBECONFIG_PATH="./deployment/opentofu/config/config-k3s"
+
+
+# Prompt the user for Docker Hub username
+read -p "Enter GITHUB username: " USERNAME
+
+# Prompt the user for Docker password securely
+read -sp "Enter GITHUB TOKEN: " TOKEN
+echo  # Just to print a newline after password input
+
+# Perform the login
+echo "Logging in to Github packages..."
+docker login --username "$USERNAME" --password "$TOKEN" ghcr.io
+
+# Check if login was successful
+if [ $? -eq 0 ]; then
+    echo "Login successful!"
+else
+    echo "Login failed. Please check your credentials and try again."
+    exit 1
+fi
+
+
+
+
+
+
+# Check if the k3s.yaml file exists
+if [ ! -f "$K3S_KUBECONFIG_DEFAULT_PATH" ]; then
+    echo "Error: K3S config file ($K3S_KUBECONFIG_DEFAULT_PATH) does not exist."
+    exit 1
+fi
+
+# Copy the k3s.yaml to the target directory
+echo "Copying K3S config to $TARGET_KUBECONFIG_PATH"
+sudo cp "$K3S_KUBECONFIG_DEFAULT_PATH" "$TARGET_KUBECONFIG_PATH"
+
+# Change ownership of the file to the current user
+echo "Changing ownership of the K3S config file"
+sudo chown $USER:$USER "$TARGET_KUBECONFIG_PATH"
+
+# Check if kubectl can get the nodes using the new Kubeconfig file
+echo "Checking Kubernetes nodes using the Kubeconfig at $TARGET_KUBECONFIG_PATH"
+kubectl get nodes --kubeconfig="$TARGET_KUBECONFIG_PATH"
+
+# Check if kubectl command was successful
+if [ $? -eq 0 ]; then
+    echo "Successfully fetched the Kubernetes nodes."
+else
+    echo "Failed to fetch Kubernetes nodes. Please check your Kubeconfig file."
+    exit 1
+fi

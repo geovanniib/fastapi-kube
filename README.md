@@ -1,3 +1,14 @@
+
+# Deployment in kubernetes of Python FastAPI with Nginx, Redis, & Postgres 
+
+
+The default application will be hosted at (`http://localhost:3000/`) . while the Grafana UI will be at (`http://localhost:8888/login`)
+
+
+
+
+![screenshot](deployment/images/app.png)
+
 # Python FastAPI Template with Nginx, Redis, & Postgres
 
 ![Container Build](https://github.com/ronin1/fastapi-template/actions/workflows/container_build.yml/badge.svg)
