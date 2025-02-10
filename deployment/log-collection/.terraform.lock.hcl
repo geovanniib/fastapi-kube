@@ -2,7 +2,8 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.opentofu.org/hashicorp/helm" {
-  version = "2.17.0"
+  version     = "2.17.0"
+  constraints = ">= 2.0.0, < 3.0.0"
   hashes = [
     "h1:69PnHoYrrDrm7C8+8PiSvRGPI55taqL14SvQR/FGM+g=",
     "zh:02690815e35131a42cb9851f63a3369c216af30ad093d05b39001d43da04b56b",
@@ -33,17 +34,5 @@ provider "registry.opentofu.org/hashicorp/kubernetes" {
     "zh:5e39824289f7b29711681bce98fbb6c27ed221b071a8c78fd0de7f6c2dae4371",
     "zh:a7bf7892217bdb0464664f62485d89d014874b0dfb564e99c364fc6dd20c6a3b",
     "zh:e8251170bad1c3e2d9c22d0f4dae7239f1a364f05732f7dff5c8e4ec76a95c5a",
-  ]
-}
-
-provider "registry.opentofu.org/hashicorp/template" {
-  version = "2.2.0"
-  hashes = [
-    "h1:tdS0otiAtvUV8uLJWJNfcqOPo3llj7FyRzExw6X1srY=",
-    "zh:374c28bafc43cd65e578cb209efc9eee4c1cec7618f451528e928db98059e8c8",
-    "zh:6a2982e70fbc2ab2668d624c648ef2eb32243c1a1185246b03991a7a21326db9",
-    "zh:af83169c21bb13f141510a349e1f70cf7d893247a269bd71cad74dd22f1df0f5",
-    "zh:b81a5bedc91a1a81b938c393247248d6c3d1bd8ea685541f9c858908c0afb6b3",
-    "zh:de15486244af2d29d44d510d647cd6e0b1408e89952261013c572b7c9bfd744b",
   ]
 }

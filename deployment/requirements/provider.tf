@@ -9,8 +9,6 @@ provider "helm" {
   }
 }
 
-provider "template" {
-}
 
 terraform {
   required_providers {
@@ -21,7 +19,7 @@ terraform {
   }
 
   backend "kubernetes" {
-    secret_suffix    = "state"
+    secret_suffix    = "state-requirements"
     config_path      = "../config/config-k3s"
   }
 }

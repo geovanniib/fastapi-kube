@@ -25,6 +25,38 @@ variable "api_port" {
 }
 
 
+variable "nginx_port" {
+  type    = string
+  default = "3000"
+}
+
+
+
+
+variable "api_delay_min" {
+  type    = string
+  default = "100"
+}
+
+
+variable "api_delay_max" {
+  type    = string
+  default = "150"
+}
+
+variable "worker_delay_min" {
+  type    = string
+  default = "100"
+}
+
+
+variable "worker_delay_max" {
+  type    = string
+  default = "150"
+}
+
+
+
 # docker credentials
 
 # variable "docker_username" {

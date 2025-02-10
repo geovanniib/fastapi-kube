@@ -24,154 +24,7 @@ resource "kubernetes_secret" "docker_registry" {
 
 
 
-# Define ConfigMap or Secret for Nginx configuration (optional)
-resource "kubernetes_config_map" "nginx_config" {
-  metadata {
-    name = "nginx-config"
-  }
 
-  data = {
-    "nginx.conf" = file("../../nginx.conf")
-  }
-}
-
-
-resource "kubernetes_deployment" "mem_db" {
-  metadata {
-    name = "mem-db"
-    labels = {
-      app = "mem-db"
-    }
-  }
-
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "mem-db"
-      }
-    }
-
-    template {
-      metadata {
-        labels = {
-          app = "mem-db"
-        }
-      }
-
-      spec {
-        container {
-          name  = "mem-db"
-          image = "redis:7-alpine"
-          resources {
-            limits = {
-              memory = "500Mi"
-              cpu    = "1"
-            }
-          }
-          port {
-            container_port = 6379
-          }
-          env {
-            name  = "REDIS_HOST"
-            value = "mem-db"
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "mem_db_service" {
-  metadata {
-    name = "mem-db-service"
-  }
-
-  spec {
-    selector = {
-      app = "mem-db"
-    }
-    port {
-      port        = 6379
-      target_port = 6379
-    }
-  }
-}
-
-# SQL_DB service (PostgreSQL)
-resource "kubernetes_deployment" "sql_db" {
-  metadata {
-    name = "sql-db"
-    labels = {
-      app = "sql-db"
-    }
-  }
-
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "sql-db"
-      }
-    }
-
-    template {
-      metadata {
-        labels = {
-          app = "sql-db"
-        }
-      }
-
-      spec {
-        container {
-          name  = "sql-db"
-          image = "postgres:17-alpine"
-          resources {
-            limits = {
-              memory = "1Gi"
-              cpu    = "1"
-            }
-          }
-          port {
-            container_port = 5432
-          }
-          env {
-            name  = "POSTGRES_HOST_AUTH_METHOD"
-            value = "trust"
-          }
-          env {
-            name  = "POSTGRES_USER"
-            value = "pguser"
-          }
-          env {
-            name  = "POSTGRES_PASSWORD"
-            value = "pgpwd"
-          }
-          env {
-            name  = "POSTGRES_DB"
-            value = "dev"
-          }
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "sql_db_service" {
-  metadata {
-    name = "sql-db-service"
-  }
-
-  spec {
-    selector = {
-      app = "sql-db"
-    }
-    port {
-      port        = 5432
-      target_port = 5432
-    }
-  }
-}
 
 # API service (Node.js or any other application)
 resource "kubernetes_deployment" "api" {
@@ -203,9 +56,14 @@ resource "kubernetes_deployment" "api" {
           image = var.api_image_name
           resources {
             limits = {
-              memory = "384Mi"
-              cpu    = "0.384"
+              memory = "100Mi"
+              cpu    = "150m"
             }
+
+            requests = {
+              memory = "50Mi"
+              cpu    = "25m"
+            }            
           }
           port {
             container_port = 8000
@@ -224,17 +82,64 @@ resource "kubernetes_deployment" "api" {
           }
           env {
             name  = "REDIS_HOST"
-            value = "mem-db"
+            value = "mem-db-service"
           }
           env {
             name  = "REDIS_PORT"
             value = "6379"
           }
+
+          env {
+            name  = "API_DELAY_MIN"
+            value = var.api_delay_min
+          }
+
+          env {
+            name  = "API_DELAY_MAX"
+            value = var.api_delay_max
+          }
+
+
+
+          liveness_probe {
+            http_get {
+              path = "/color"
+              port = 8000
+            }
+
+            failure_threshold = 5
+            period_seconds = 5
+          }
+
+          startup_probe {
+            http_get {
+              path = "/color"
+              port = 8000
+            }
+
+            failure_threshold = 3
+            period_seconds = 30
+          }
+
+          readiness_probe {
+            
+            http_get {
+              path = "/color"
+              port = 8000
+            }
+
+            failure_threshold = 3
+            period_seconds = 5
+
+          }
+
         }
 
         image_pull_secrets {
             name = kubernetes_secret.docker_registry.metadata[0].name
         }
+
+
       }
     }
   }
@@ -286,9 +191,14 @@ resource "kubernetes_deployment" "worker" {
           image = var.worker_image_name
           resources {
             limits = {
-              memory = "384Mi"
-              cpu    = "0.384"
+              memory = "100Mi"
+              cpu    = "150m"
             }
+
+            requests = {
+              memory = "50Mi"
+              cpu    = "25m"
+            }            
           }
           port {
             container_port = 8000
@@ -299,7 +209,7 @@ resource "kubernetes_deployment" "worker" {
           }
           env {
             name  = "REDIS_HOST"
-            value = "mem-db"
+            value = "mem-db-service"
           }
           env {
             name  = "REDIS_PORT"
@@ -307,7 +217,7 @@ resource "kubernetes_deployment" "worker" {
           }
           env {
             name  = "POSTGRES_HOST"
-            value = "sql-db"
+            value = "sql-db-service"
           }
           env {
             name  = "POSTGRES_PORT"
@@ -325,7 +235,58 @@ resource "kubernetes_deployment" "worker" {
             name  = "POSTGRES_DB"
             value = "dev"
           }
+
+
+          env {
+            name  = "WORKER_DELAY_MIN"
+            value = var.worker_delay_min
+          }
+
+          env {
+            name  = "WORKER_DELAY_MAX"
+            value = var.worker_delay_max
+          }
+
+
+
+
+
+          liveness_probe {
+            http_get {
+              path = "/worker"
+              port = 8000
+            }
+
+            failure_threshold = 5
+            period_seconds = 5
+          }
+
+          startup_probe {
+            http_get {
+              path = "/worker"
+              port = 8000
+            }
+
+            failure_threshold = 3
+            period_seconds = 30
+          }
+
+          readiness_probe {
+            
+            http_get {
+              path = "/worker"
+              port = 8000
+            }
+
+            failure_threshold = 3
+            period_seconds = 5
+
+          }
+
+
+          
         }
+
 
         image_pull_secrets {
             name = kubernetes_secret.docker_registry.metadata[0].name
@@ -351,78 +312,10 @@ resource "kubernetes_service" "worker_service" {
   }
 }
 
-# NGINX Service for Load Balancer
-resource "kubernetes_deployment" "nginx" {
-  metadata {
-    name = "nginx"
-    labels = {
-      app = "nginx"
-    }
-  }
 
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "nginx"
-      }
-    }
 
-    template {
-      metadata {
-        labels = {
-          app = "nginx"
-        }
-      }
 
-      spec {
-        container {
-          name  = "nginx"
-          image = "nginx:1-alpine"
-          resources {
-            limits = {
-              memory = "256Mi"
-              cpu    = "0.512"
-            }
-          }
-          port {
-            container_port = 80
-          }
-          volume_mount {
-            name = "nginx-volume"
-            mount_path = "/etc/nginx/nginx.conf"
-            sub_path   = "nginx.conf"
-          }
-        }
 
-      volume {
-        name = "nginx-volume"
-        config_map {
-          name = "nginx-config"
-        }
-      }
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "nginx_service" {
-  metadata {
-    name = "nginx-service"
-  }
-
-  spec {
-    selector = {
-      app = "nginx"
-    }
-    port {
-      port        = 8000
-      target_port = 80
-    }
-
-    type = "LoadBalancer"
-  }
-}
 
 
 
