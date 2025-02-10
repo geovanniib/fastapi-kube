@@ -19,28 +19,7 @@ Contains images used in redme.md
 
 ### opentofu
 
-tree
-.
-├── config
-│   ├── config-file-here.txt
-│   └── config-k3s
-├── fastapi
-│   ├── external.tf
-│   ├── keda.tf
-│   ├── main.tf
-│   ├── output.tf
-│   ├── provider.tf
-│   ├── storage.tf
-│   └── variables.tf
-├── monitoring
-│   ├── main.tf
-│   ├── notes.txt
-│   ├── output.tf
-│   ├── provider.tf
-│   └── variables.tf
-└── requirements
-    ├── main.tf
-    └── provider.tf
+tree .
 
 In the "config" directory you need to store the KUBECONFIG of the local k3s for the correct operation of the implementation named "config-k3s" which is ignored in the gitignore.
 
