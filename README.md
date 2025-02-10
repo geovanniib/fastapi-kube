@@ -27,9 +27,9 @@ Using the `tf-setup` bash script the color_worker and color_api images will be p
 
 3. Deployment of the entire application 
 
-First, using the default values ​​you should leave port 3000 and 8888 free so that there are no problems with the load balancers used. Then, using the bash script "tf-run" and the docker and k3s credentials already configured in step 1, everything required will be executed. For more detailed information read the deployment/README.md.
+First, using the default values ​​you should leave port 3000 and 8888 free so that there are no problems with the load balancers used. Then, using the bash script "tf-run" and the docker and k3s credentials already configured in step 1, everything required will be executed. For more detailed information read the deployment/README.md. Additionally, the Grafana password will appear in the console after the script has been executed. If for some reason the password does not appear, you would have to verify that the KUBECONFIG of the k3s is set as default in the current session.
 
-![screenshot](deployment/images/kubernetes.png)
+![screenshot](deployment/images/kubernetes_init.png)
 
 ![screenshot](deployment/images/grafana.png)
 
@@ -39,6 +39,14 @@ First, using the default values ​​you should leave port 3000 and 8888 free s
 If k6 is installed, proceed to run the load testing with the help of the `tf-load` script to simulate how it behaves under load, in addition to its respective auto-scaling.
 
 ![screenshot](deployment/images/k6.png)
+
+![screenshot](deployment/images/kubernetes_load.png)
+
+
+5. Clean the kubernetes cluster
+
+Using the `tf-stop` bash script, the kubernetes resources will be deleted from the cluster leaving only the tf-state secrets
+
 
 
 # Python FastAPI Template with Nginx, Redis, & Postgres
