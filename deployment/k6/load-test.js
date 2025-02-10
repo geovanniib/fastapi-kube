@@ -11,7 +11,7 @@ export const options = {
   duration: '3m',
   ext: {
     loadimpact: {
-      name: 'Smoke Test',
+      name: 'Load Test',
     },
   },
 };
