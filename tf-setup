@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Set default values for environment variables if they are not set
+: "${API_IMAGE_NAME:=color_api}"
+: "${WORKER_IMAGE_NAME:=color_worker}"
+: "${DOCKER_REGISTRY:=ghcr.io/geovanniib}"
+: "${API_IMAGE_TAG:=latest}"
+: "${WORKER_IMAGE_TAG:=latest}"
+
+# Set image names with the registry prefix
+API_IMAGE="${DOCKER_REGISTRY}/${API_IMAGE_NAME}:${API_IMAGE_TAG}"
+WORKER_IMAGE="${DOCKER_REGISTRY}/${WORKER_IMAGE_NAME}:${WORKER_IMAGE_TAG}"
+
+
+# Step 1: Build the Docker images
+echo "Building the API image..."
+docker build -f Dockerfile.api -t "${API_IMAGE}" .
+
+echo "Building the Worker image..."
+docker build -f Dockerfile.worker -t "${WORKER_IMAGE}" .
+
+# Step 2: Push the Docker images to the Docker registry
+echo "Pushing the API image to ${DOCKER_REGISTRY}..."
+docker push "${API_IMAGE}"
+
+echo "Pushing the Worker image to ${DOCKER_REGISTRY}..."
+docker push "${WORKER_IMAGE}"
+
+# Step 3: Check if images were pushed successfully
+if [ $? -eq 0 ]; then
+    echo "Images successfully pushed to ${DOCKER_REGISTRY}."
+else
+    echo "Error pushing images to ${DOCKER_REGISTRY}. Exiting..."
+    exit 1
+fi

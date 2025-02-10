@@ -1,0 +1,58 @@
+
+### HEALTCHECK ENDPOINTS
+
+--> nginx
+http://localhost:3000/
+{"message": "Load Balancer say: Hello! 👋"}
+
+-> api
+http://localhost:3000/color
+{"status":"OK","name":"color api 🎨","host":"api-64cbc4cd55-g9wz9","boot":"2025-02-08T19:20:28.765855","alive":"1:42:59.005324"}
+
+-> worker
+curl -iXGET 'http://localhost:3000/worker'
+{"status":"OK","name":"color worker 🤖","host":"worker-5bf8b998f4-clxdl","boot":"2025-02-08T19:21:30.210751","alive":"1:47:05.499762"}
+
+
+### OUTPUT NAMES
+
+http://localhost:3000/color/names
+{"count":15,"names":["white","black","gray","red","pink","grape","violet","indigo","blue","cyan","teal","green","lime","yellow","orange"]}
+
+
+### OUTPUT APIS
+
+http://localhost:3000/color/match?name={color_or_hex}
+
+
+### OUTPUT EXAMPLES APIS
+
+
+curl -iXGET 'http://localhost:3000/color/match?name=fff'
+{"detail":[{"type":"missing","loc":["query","name"],"msg":"Field required","input":{}}]}
+
+
+
+curl -iXGET 'http://localhost:3000/color/match?name=000'
+
+
+curl -iXGET 'http://localhost:3000/color/match?name=light+blue'
+
+curl -iXGET 'http://localhost:3000/color/match?name=green'
+
+curl -iXGET 'http://localhost:3000/color/match?name=ffffff'
+
+
+### VARIABLES TO MAKE DELAY (HEAVY LOADING)
+
+API_DELAY_MIN=100
+API_DELAY_MAX=150
+
+WORKER_DELAY_MIN=100
+WORKER_DELAY_MAX=150
+
+
+### COMMAND TO TEST IN LINUX
+
+for (( i=1 ; i < 300 ;  i++ )); do curl -s http://localhost:3030/color && curl -s http://localhost:3030/worker && date && sleep 3s; echo -e "\n"; done
+
