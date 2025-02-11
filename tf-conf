@@ -49,6 +49,9 @@ kubectl get nodes --kubeconfig="$TARGET_KUBECONFIG_PATH"
 # Check if kubectl command was successful
 if [ $? -eq 0 ]; then
     echo "Successfully fetched the Kubernetes nodes."
+
+    echo "If the default kubeconfig is not configured with the k3s credentials, run the following command"
+    echo "export KUBECONFIG=$(pwd)/deployment/opentofu/config/config-k3s"
 else
     echo "Failed to fetch Kubernetes nodes. Please check your Kubeconfig file."
     exit 1

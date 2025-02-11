@@ -62,6 +62,28 @@ resource "kubernetes_deployment" "sql_db" {
             value = "dev"
           }
 
+          liveness_probe {
+            exec {
+              command = [ "sh","-c","pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+            }
+
+            initial_delay_seconds = 10
+            period_seconds = 5
+            timeout_seconds = 15
+            failure_threshold = 10
+          }
+
+          readiness_probe {
+            exec {
+              command = [ "sh","-c","pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+            }
+
+            initial_delay_seconds = 10
+            period_seconds = 5
+            timeout_seconds = 15
+            failure_threshold = 5
+
+          }
           volume_mount {
             name = "init-db-volume"
             mount_path = "/docker-entrypoint-initdb.d/000_schema.sql"
@@ -144,6 +166,30 @@ resource "kubernetes_deployment" "mem_db" {
             name  = "REDIS_HOST"
             value = "mem-db"
           }
+
+          liveness_probe {
+            exec {
+              command = [ "redis-cli","--raw","incr", "ping"]
+            }
+
+            initial_delay_seconds = 5
+            period_seconds = 5
+            timeout_seconds = 2
+            failure_threshold = 5
+          }
+
+          readiness_probe {
+            exec {
+              command = [ "redis-cli","--raw","incr", "ping"]
+            }
+
+            initial_delay_seconds = 5
+            period_seconds = 5
+            timeout_seconds = 2
+            failure_threshold = 3
+
+          }
+
         }
       }
     }

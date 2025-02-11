@@ -3,18 +3,6 @@ resource "kubernetes_secret" "docker_registry" {
     name = "docker-registry-secret"
   }
 
-  # data = {
-  #   ".dockerconfigjson" = base64encode(jsonencode({
-  #     auths = {
-  #       "ghcr.io"= {
-  #         # username = var.docker_username
-  #         # password = var.docker_password
-  #         # email    = var.docker_email
-  #       }
-  #     }
-  #   }))
-  # }
-
   data = {
     ".dockerconfigjson" = "${file("~/.docker/config.json")}"
   }
@@ -56,13 +44,12 @@ resource "kubernetes_deployment" "api" {
           image = var.api_image_name
           resources {
             limits = {
-              memory = "100Mi"
-              cpu    = "150m"
+              memory = var.api_mem_limit
+              cpu    = var.api_cpu_limit
             }
-
             requests = {
-              memory = "50Mi"
-              cpu    = "25m"
+              memory = var.api_mem_request
+              cpu    = var.api_cpu_request
             }            
           }
           port {
@@ -191,14 +178,13 @@ resource "kubernetes_deployment" "worker" {
           image = var.worker_image_name
           resources {
             limits = {
-              memory = "100Mi"
-              cpu    = "150m"
+              memory = var.worker_mem_limit
+              cpu    = var.worker_cpu_limit
             }
-
             requests = {
-              memory = "50Mi"
-              cpu    = "25m"
-            }            
+              memory = var.worker_mem_request
+              cpu    = var.worker_cpu_request
+            }               
           }
           port {
             container_port = 8000
